@@ -1,0 +1,4 @@
+/apiindserver/bin/*
+/apiindserver/obj/*
+/authservice/bin/*
+/authservice/obj/*
