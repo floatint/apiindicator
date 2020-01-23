@@ -30,6 +30,8 @@ namespace apiindserver.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllCriterias()
         {
+            return Ok(await DbContext.Criterias.Include(x => x.Project.Id).ToListAsync());
+
             var criteriasList = await DbContext.Criterias.ToListAsync();
             var criteriasDTOList = new List<Models.DTO.CriteriaInfo>();
             foreach (var criteria in criteriasList)

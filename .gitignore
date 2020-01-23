@@ -2,3 +2,4 @@
 /apiindserver/obj/*
 /authservice/bin/*
 /authservice/obj/*
+/.vs

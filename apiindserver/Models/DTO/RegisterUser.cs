@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace apiindserver.Models.DTO
 {
-    public class RegisterUser
+    public class NewUser
     {
         [Required(ErrorMessage = "Введите логин пользователя")]
         public string Login { get; set; }

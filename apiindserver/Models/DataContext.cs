@@ -14,6 +14,7 @@ namespace apiindserver.Models
         public DbSet<Role> Roles { set; get; }
         public DbSet<Version> Versions { set; get; }
         public DbSet<Criteria> Criterias { set; get; }
+        public DbSet<LogRecord> LogRecords { set; get; }
 
 
         public DataContext(DbContextOptions<DataContext> options) : base(options)

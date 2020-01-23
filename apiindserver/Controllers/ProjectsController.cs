@@ -26,8 +26,10 @@ namespace apiindserver.Controllers
         //Get all projects
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public IActionResult GetAllProjects()
+        public async Task<IActionResult> GetAllProjects()
         {
+
+            return Ok(await DbContext.Projects.Include(x => x.Version).ToArrayAsync());
             var projectsList = DbContext.Projects.ToList();
             var projectsDTOList = new List<Models.DTO.ProjectView>();
             foreach(var project in projectsList)
@@ -46,8 +48,18 @@ namespace apiindserver.Controllers
         //Get {id} project info
         [HttpGet("{id:long}")]
         [Authorize(Roles = "Admin")]
-        public IActionResult GetProject(long id)
+        public async Task<IActionResult> GetProject(long id)
         {
+            var proj = await DbContext.Projects
+                                      .Include(x => x.Products)
+                                      .Include(x => x.Testers)
+                                      .Include(x => x.Version)
+                                      .FirstOrDefaultAsync(x => x.Id == id);
+            if (proj == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, string.Format("Project with ID = {0} not found", id));
+            }
+            return Ok(proj);
             var project = DbContext.Projects
                 .Include(x => x.Testers)
                 .Include(x => x.Products)
@@ -92,18 +104,60 @@ namespace apiindserver.Controllers
                 if (version == null)
                 {
                     version = new Models.Version { Name = newProject.Version };
-                    DbContext.Versions.Add(version);
+                    await DbContext.Versions.AddAsync(version);
                     await DbContext.SaveChangesAsync();
                 }
-                DbContext.Projects.Add(new Models.Project
+                var project = new Models.Project
                 {
                     Name = newProject.Name,
-                    Version = await DbContext.Versions.FirstOrDefaultAsync(x => x.Name == newProject.Version)
-                });
+                    Version = version
+                };
+                await DbContext.Projects.AddAsync(project);
                 await DbContext.SaveChangesAsync();
-                return Ok();
+                return Ok(project);
             }
             return BadRequest(ModelState);
         }
+
+        [HttpPut("{id:long}")]
+        public async Task<IActionResult> UpdateProject([FromBody] Models.DTO.UpdatedProject upProj, long id)
+        {
+            if (ModelState.IsValid)
+            {
+                var project = await DbContext.Projects.FirstOrDefaultAsync(x => x.Id == id);
+                if (project == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, string.Format("Project with ID = {0} not found", 0));
+                }
+                var version = await DbContext.Versions.FirstOrDefaultAsync(x => x.Name == upProj.Version);
+                if (version == null)
+                {
+                    version = new Models.Version
+                    {
+                        Name = upProj.Version
+                    };
+                    await DbContext.Versions.AddAsync(version);
+                    await DbContext.SaveChangesAsync();
+                }
+                project.Name = upProj.Name;
+                project.Version = version;
+                DbContext.Projects.Update(project);
+                await DbContext.SaveChangesAsync();
+                return Ok(project);
+            }
+            return BadRequest(ModelState);
+        }
+
+        [HttpDelete("{id:long}")]
+        public async Task<IActionResult> DeleteProject(long id)
+        {
+            var project = await DbContext.Projects.FirstOrDefaultAsync(x => x.Id == id);
+            if (project == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, string.Format("Project with ID = {0} not found", id));
+            }
+            return Ok(project);
+        }
+
     }
 }

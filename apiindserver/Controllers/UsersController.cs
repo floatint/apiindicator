@@ -65,7 +65,7 @@ namespace apiindserver.Controllers
         //Register the new user
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Register([FromBody] Models.DTO.RegisterUser newUser)
+        public async Task<IActionResult> AddUser([FromBody] Models.DTO.NewUser newUser)
         {
             if (ModelState.IsValid)
             {
@@ -81,9 +81,13 @@ namespace apiindserver.Controllers
                     Role = role
                 };
 
-                DbContext.Users.Add(user);
+                await DbContext.Users.AddAsync(user);
                 await DbContext.SaveChangesAsync();
-                return Ok();
+                return Ok(new Models.DTO.UserView{
+                    Login = user.Login,
+                    Role = user.Role
+                }
+                );
             }
             return BadRequest(ModelState);
         }
@@ -95,16 +99,17 @@ namespace apiindserver.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(long id)
         {
-            try
+            var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (user == null)
             {
-                DbContext.Users.Remove(new Models.User { Id = id });
-                await DbContext.SaveChangesAsync();
-                return Ok();
-            } 
-            catch(Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+                return StatusCode(StatusCodes.Status404NotFound, string.Format("User with ID = {0} not found", id));
             }
+            DbContext.Users.Remove(user);
+            await DbContext.SaveChangesAsync();
+            return Ok(new Models.DTO.UserView {
+                Login = user.Login,
+                Role = user.Role
+            });
         }
 
         //PUT
@@ -112,7 +117,7 @@ namespace apiindserver.Controllers
         //Update {id} user's information.
         [HttpPut("id:long")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateUser(long id, [FromBody] Models.DTO.UpdateUser userObj)
+        public async Task<IActionResult> UpdateUser(long id, [FromBody] Models.DTO.UpdatedUser userObj)
         {
             if (ModelState.IsValid)
             {

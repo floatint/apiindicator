@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace apiindserver.Models.DTO
 {
-    public class UpdateUser
+    public class UpdatedUser
     {
         [Required(ErrorMessage = "User login not defined")]
         public string Login { set; get; }
