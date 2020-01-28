@@ -42,6 +42,33 @@ namespace apiindserver.Controllers
                 {
                     return StatusCode(StatusCodes.Status404NotFound, string.Format("Project with ID = {0} not found", newProduct.ProjectID));
                 }
+                var product = new Models.Product
+                {
+                    Name = newProduct.ProductName
+                };
+                await DbContext.Products.AddAsync(product);
+                project.Products.Add(product);
+                DbContext.Projects.Update(project);
+                await DbContext.SaveChangesAsync();
+                return Ok(product);
+            }
+            return BadRequest(ModelState);
+        }
+
+        [HttpPut("{id:long}")]
+        public async Task<IActionResult> UpdateProduct(long id, [FromBody] Models.DTO.UpdatedProduct updatedProduct)
+        {
+            if (ModelState.IsValid)
+            {
+                var product = await DbContext.Products.FirstOrDefaultAsync(x => x.Id == id);
+                if (product == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, string.Format("Product with ID = {0} not found", id));
+                }
+                product.Name = updatedProduct.Name;
+                DbContext.Products.Update(product);
+                await DbContext.SaveChangesAsync();
+                return Ok(product);
             }
             return BadRequest(ModelState);
         }
