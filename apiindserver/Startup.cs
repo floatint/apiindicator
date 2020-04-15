@@ -30,7 +30,7 @@ namespace apiindserver
         public void ConfigureServices(IServiceCollection services)
         {
             //configuring db connection
-            string connection = Configuration.GetConnectionString("DefaultConnection");
+            string connection = Configuration.GetConnectionString("MSSQLServer");
             services.AddDbContext<Models.DataContext>(options =>
                 options.UseSqlServer(connection));
 
@@ -54,7 +54,17 @@ namespace apiindserver
                     ClockSkew = TimeSpan.Zero
                 };
             });
-            
+
+            //automapper
+            // Auto Mapper Configurations
+            var mappingConfig = new AutoMapper.MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new Models.DTO.MappingProfile());
+            });
+
+            AutoMapper.IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
 
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);

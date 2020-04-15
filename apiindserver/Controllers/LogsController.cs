@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+
 
 namespace apiindserver.Controllers
 {
@@ -13,20 +15,23 @@ namespace apiindserver.Controllers
     public class LogsController : ControllerBase
     {
         private Models.DataContext DataContext { set; get; }
+        private IMapper Mapper { set; get; }
 
-        public LogsController(Models.DataContext context)
+        public LogsController(Models.DataContext context, IMapper mapper)
         {
             DataContext = context;
+            Mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllLogRecords()
         {
-            return Ok(await DataContext.LogRecords.ToListAsync());
+            var records = await DataContext.LogRecords.ToArrayAsync();
+            return Ok(Mapper.Map<IList<Models.LogRecord>, List<Models.DTO.LogRecord>>(records));
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddNewLogRecord([FromBody] Models.DTO.NewLogRecord logRecord)
+        public async Task<IActionResult> AddNewLogRecord([FromBody] Models.DTO.LogRecord logRecord)
         {
             if (ModelState.IsValid)
             {

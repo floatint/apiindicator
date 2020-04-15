@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace apiindserver.Controllers
 {
@@ -15,10 +16,12 @@ namespace apiindserver.Controllers
     public class CriteriasController : ControllerBase
     {
         private Models.DataContext DbContext { set; get; }
+        private IMapper Mapper { set; get; }
 
-        public CriteriasController(Models.DataContext context)
+        public CriteriasController(Models.DataContext context, IMapper mapper)
         {
             DbContext = context;
+            Mapper = mapper;
         }
 
 
@@ -30,33 +33,8 @@ namespace apiindserver.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllCriterias()
         {
-            return Ok(await DbContext.Criterias.Include(x => x.Project.Id).ToListAsync());
-
-            var criteriasList = await DbContext.Criterias.ToListAsync();
-            var criteriasDTOList = new List<Models.DTO.CriteriaInfo>();
-            foreach (var criteria in criteriasList)
-            {
-                Models.DTO.ProjectView criteriaProjectInfo = null;
-                if (criteria.Project != null)
-                {
-                    criteriaProjectInfo = new Models.DTO.ProjectView
-                    {
-                        Id = criteria.Project.Id,
-                        Name = criteria.Project.Name,
-                        Version = criteria.Project.Version.Name
-                    };
-                }
-                criteriasDTOList.Add(new Models.DTO.CriteriaInfo {
-                    Id = criteria.Id,
-                    Name = criteria.Name,
-                    DifferencePercent = criteria.DifferencePercent,
-                    Color = criteria.Color,
-                    Project = criteriaProjectInfo
-                });
-
-            }
-
-            return Ok(criteriasDTOList);
+            var data = await DbContext.Criterias.ToListAsync();
+            return Ok(Mapper.Map<IList<Models.Criteria>, IList<Models.DTO.Criteria>>(data));
         }
 
         //GET
@@ -70,25 +48,9 @@ namespace apiindserver.Controllers
             if (criteria == null)
             {
 
-                //return StatusCode(StatusCodes.Status404NotFound, id);
+                return StatusCode(StatusCodes.Status404NotFound, projectId);
             }
-            var projectInfo = new Models.DTO.ProjectView();
-            if (criteria.Project == null)
-            {
-                projectInfo = null;
-            }
-            else
-            {
-                projectInfo.Id = criteria.Project.Id;
-                projectInfo.Name = criteria.Project.Name;
-                projectInfo.Version = criteria.Project.Version.Name;
-            }
-            return Ok(new Models.DTO.CriteriaView {
-                            Name = criteria.Name,
-                            DifferencePercent = criteria.DifferencePercent,
-                            Color = criteria.Color,
-                            Project = projectInfo
-            });
+            return Ok(Mapper.Map<Models.Criteria, Models.DTO.Criteria>(criteria));
         }
 
         //POST
@@ -96,18 +58,19 @@ namespace apiindserver.Controllers
         //Create new criteria
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddCriteria([FromBody] Models.DTO.NewCriteria newCriteria)
+        public async Task<IActionResult> AddCriteria([FromBody] Models.DTO.Criteria newCriteria)
         {
             if (ModelState.IsValid)
             {
-                var criteria = new Models.Criteria
+                if (newCriteria.Name == null || newCriteria.Name.Length == 0)
+                    return StatusCode(StatusCodes.Status400BadRequest, "Criteria name is null");
+                if (newCriteria.ProjectId == null)
                 {
-                    Name = newCriteria.Name,
-                    DifferencePercent = newCriteria.DifferencePercent,
-                    Color = newCriteria.Color,
-                    Project = DbContext.Projects.FirstOrDefault(x => x.Id == newCriteria.ProjectId)
-                };
-
+                    var existsCriteria = await DbContext.Criterias.FirstOrDefaultAsync(x => x.Name == newCriteria.Name);
+                    if (existsCriteria != null)
+                        return StatusCode(StatusCodes.Status400BadRequest, "Criteria already exists");
+                }
+                var criteria = Mapper.Map<Models.DTO.Criteria, Models.Criteria>(newCriteria);
                 DbContext.Criterias.Add(criteria);
                 await DbContext.SaveChangesAsync();
                 return Ok();
@@ -120,20 +83,16 @@ namespace apiindserver.Controllers
         //Update criteria
         [HttpPut("{id:long}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateCriteria(long id, [FromBody] Models.DTO.UpdateCriteria criteriaData)
+        public async Task<IActionResult> UpdateCriteria(long id, [FromBody] Models.DTO.Criteria criteriaData)
         {
             var criteria = DbContext.Criterias.FirstOrDefault(x => x.Id == id);
             if (criteria == null)
             {
                 return StatusCode(StatusCodes.Status404NotFound, id);
             }
-            if (criteriaData.Name != null)
-                criteria.Name = criteriaData.Name;
-            if (criteriaData.DifferencePercent.HasValue)
-                criteria.DifferencePercent = criteriaData.DifferencePercent.Value;
-            if (criteriaData.Color.HasValue)
-                criteria.Color = criteriaData.Color.Value;
-            DbContext.Criterias.Update(criteria);
+            var newCriteria = Mapper.Map<Models.DTO.Criteria, Models.Criteria>(criteriaData);
+            newCriteria.Id = id;
+            DbContext.Criterias.Update(newCriteria);
             await DbContext.SaveChangesAsync();
             return Ok(id);
         }

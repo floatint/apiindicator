@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace apiindserver.Controllers
 {
@@ -15,10 +16,12 @@ namespace apiindserver.Controllers
     public class ProjectsController : ControllerBase
     {
         private Models.DataContext DbContext { set; get; }
+        private IMapper Mapper { set; get; }
 
-        public ProjectsController(Models.DataContext context)
+        public ProjectsController(Models.DataContext context, IMapper mapper)
         {
             DbContext = context;
+            Mapper = mapper;
         }
 
         //GET
@@ -28,19 +31,8 @@ namespace apiindserver.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllProjects()
         {
-
+            
             return Ok(await DbContext.Projects.Include(x => x.Version).ToArrayAsync());
-            var projectsList = DbContext.Projects.ToList();
-            var projectsDTOList = new List<Models.DTO.ProjectView>();
-            foreach(var project in projectsList)
-            {
-                projectsDTOList.Add(new Models.DTO.ProjectView {
-                    Id = project.Id,
-                    Name = project.Name,
-                    Version = project.Version.Name
-                });
-            }
-            return Ok(projectsDTOList);
         }
 
         //GET
@@ -60,31 +52,6 @@ namespace apiindserver.Controllers
                 return StatusCode(StatusCodes.Status404NotFound, string.Format("Project with ID = {0} not found", id));
             }
             return Ok(proj);
-            var project = DbContext.Projects
-                .Include(x => x.Testers)
-                .Include(x => x.Products)
-                .FirstOrDefault(x => x.Id == id);
-            if (project == null)
-            {
-                return StatusCode(StatusCodes.Status404NotFound, id);
-            }
-            var projectInfo = new Models.DTO.ProjectInfo();
-            foreach(var tester in project.Testers)
-            {
-                projectInfo.Testers.Add(new Models.DTO.UserInfo {
-                    Id = tester.Id,
-                    Login = tester.Login,
-                    Role = tester.Role
-                });
-            }
-            foreach(var product in project.Products)
-            {
-                projectInfo.Products.Add(new Models.DTO.ProductInfo {
-                    Id = product.Id,
-                    Name = product.Name
-                });
-            }
-            return Ok(projectInfo);
         }
 
         //GET
@@ -96,7 +63,7 @@ namespace apiindserver.Controllers
         //Add new project
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddProject([FromBody] Models.DTO.NewProject newProject)
+        public async Task<IActionResult> AddProject([FromBody] Models.DTO.Project newProject)
         {
             if (ModelState.IsValid)
             {
@@ -120,7 +87,7 @@ namespace apiindserver.Controllers
         }
 
         [HttpPut("{id:long}")]
-        public async Task<IActionResult> UpdateProject([FromBody] Models.DTO.UpdatedProject upProj, long id)
+        public async Task<IActionResult> UpdateProject([FromBody] Models.DTO.Project upProj, long id)
         {
             if (ModelState.IsValid)
             {

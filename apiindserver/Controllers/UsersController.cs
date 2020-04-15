@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace apiindserver.Controllers
 {
@@ -21,11 +22,13 @@ namespace apiindserver.Controllers
     {
 
         private Models.DataContext DbContext { set; get; }
+        private IMapper Mapper { set; get; }
         //private AppSettings AppSettings { set; get; }
 
-        public UsersController(Models.DataContext context) 
+        public UsersController(Models.DataContext context, IMapper mapper) 
         {
             DbContext = context;
+            Mapper = mapper;
             //AppSettings = AppSettings;
         }
 
@@ -37,12 +40,7 @@ namespace apiindserver.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var usersList = await DbContext.Users.Include(x => x.Role).ToListAsync();
-            var usersDTOList = new List<Models.DTO.UserInfo>();
-            foreach(var user in usersList)
-            {
-                usersDTOList.Add(new Models.DTO.UserInfo { Id = user.Id, Login = user.Login, Role = user.Role });
-            }
-            return Ok(usersDTOList);
+            return Ok(Mapper.Map<List<Models.User>, List<Models.DTO.User>>(usersList));
         }
 
         //GET
@@ -55,7 +53,8 @@ namespace apiindserver.Controllers
             var user = await DbContext.Users.Include(x => x.Role).FirstOrDefaultAsync(x => x.Id == id);
             if (user != null)
             {
-                return Ok(new Models.DTO.UserView { Login = user.Login, Role = user.Role});
+                return Ok(Mapper.Map<Models.DTO.User>(user));
+                //return Ok(new Models.DTO.UserView { Login = user.Login, Role = user.Role});
             }
             return StatusCode(StatusCodes.Status404NotFound, id);
         }
@@ -65,7 +64,7 @@ namespace apiindserver.Controllers
         //Register the new user
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddUser([FromBody] Models.DTO.NewUser newUser)
+        public async Task<IActionResult> AddUser([FromBody] Models.DTO.Auth.NewUser newUser)
         {
             if (ModelState.IsValid)
             {
@@ -83,11 +82,12 @@ namespace apiindserver.Controllers
 
                 await DbContext.Users.AddAsync(user);
                 await DbContext.SaveChangesAsync();
-                return Ok(new Models.DTO.UserView{
-                    Login = user.Login,
-                    Role = user.Role
-                }
-                );
+                return Ok(Mapper.Map<Models.DTO.User>(user));
+                //return Ok(new Models.DTO.UserView{
+                //    Login = user.Login,
+                //    Role = user.Role
+                //}
+                //);
             }
             return BadRequest(ModelState);
         }
@@ -106,10 +106,11 @@ namespace apiindserver.Controllers
             }
             DbContext.Users.Remove(user);
             await DbContext.SaveChangesAsync();
-            return Ok(new Models.DTO.UserView {
-                Login = user.Login,
-                Role = user.Role
-            });
+            return Ok(Mapper.Map<Models.DTO.User>(user));
+            //return Ok(new Models.DTO.UserView {
+            //    Login = user.Login,
+            //    Role = user.Role
+            //});
         }
 
         //PUT
@@ -117,7 +118,7 @@ namespace apiindserver.Controllers
         //Update {id} user's information.
         [HttpPut("id:long")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateUser(long id, [FromBody] Models.DTO.UpdatedUser userObj)
+        public async Task<IActionResult> UpdateUser(long id, [FromBody] Models.DTO.User userObj)
         {
             if (ModelState.IsValid)
             {
@@ -130,7 +131,7 @@ namespace apiindserver.Controllers
                     role = user.Role;
                 }
 
-                user.Login = userObj.Login;
+                user.Name = userObj.Name;
                 user.Role = role;
                 DbContext.Users.Update(user);
                 await DbContext.SaveChangesAsync();

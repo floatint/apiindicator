@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
-namespace apiindserver.Models.DTO
+namespace apiindserver.Models.DTO.Auth
 {
     public class NewUser
     {
@@ -12,6 +12,8 @@ namespace apiindserver.Models.DTO
         public string Login { get; set; }
         [Required(ErrorMessage = "Введите пароль")]
         public string Password { get; set; }
+        [Required(ErrorMessage = "Введите имя пользователя")]
+        public string Name { set; get; }
         public long? RoleID { set; get; }
     }
 }

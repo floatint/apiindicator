@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace apiindserver.Models.DTO
 {
-    public class CriteriaView
+    public class Criteria
     {
         public string Name { set; get; }
-        public double DifferencePercent { set; get; }
-        public int Color { set; get; }
-        public virtual ProjectView Project { set; get; }
+        public double? DifferencePercent { set; get; }
+        public int? Color { set; get; }
+        public long? ProjectId { set; get; }
     }
 }

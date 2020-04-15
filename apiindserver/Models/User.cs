@@ -10,6 +10,7 @@ namespace apiindserver.Models
         public long Id { set; get; }
         public string Login { set; get; }
         public string Password { set; get; }
+        public string Name { set; get; }
         public virtual Role Role { set; get; }
     }
 }

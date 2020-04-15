@@ -5,10 +5,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20191012184146_Initial.cs" />
+    <Compile Remove="Migrations\20191012184146_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20200201224254_Init.cs" />
+    <Compile Remove="Migrations\20200201224254_Init.Designer.cs" />
+    <Compile Remove="Migrations\20200201224618_Init.cs" />
+    <Compile Remove="Migrations\20200201224618_Init.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.11" />

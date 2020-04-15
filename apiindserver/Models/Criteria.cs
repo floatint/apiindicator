@@ -11,6 +11,7 @@ namespace apiindserver.Models
         public string Name { set; get; }
         public double DifferencePercent { set; get; }
         public int Color { set; get; }
+        public long? ProjectId { set; get; }
         public virtual Project Project { set; get; }
     }
 }

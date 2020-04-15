@@ -32,7 +32,7 @@ namespace apiindserver.Controllers
         //URL : api/users/login
         //User's authentication
         [HttpPost("login")]
-        public IActionResult Login([FromBody] Models.DTO.LoginUser userObj)
+        public IActionResult Login([FromBody] Models.DTO.Auth.LoginUser userObj)
         {
             if (ModelState.IsValid)
             {

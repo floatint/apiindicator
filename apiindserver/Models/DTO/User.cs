@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
 
 namespace apiindserver.Models.DTO
 {
-    public class UpdatedUser
+    public class User
     {
-        [Required(ErrorMessage = "User login not defined")]
-        public string Login { set; get; }
+        public long Id { set; get; }
+        public string Name { set; get; }
         public long? RoleId { set; get; }
+        public virtual Role Role { set; get;}
     }
 }
