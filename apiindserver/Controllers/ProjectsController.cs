@@ -67,17 +67,10 @@ namespace apiindserver.Controllers
         {
             if (ModelState.IsValid)
             {
-                var version = await DbContext.Versions.FirstOrDefaultAsync(x => x.Name == newProject.Version);
-                if (version == null)
-                {
-                    version = new Models.Version { Name = newProject.Version };
-                    await DbContext.Versions.AddAsync(version);
-                    await DbContext.SaveChangesAsync();
-                }
                 var project = new Models.Project
                 {
                     Name = newProject.Name,
-                    Version = version
+                    Version = newProject.Version
                 };
                 await DbContext.Projects.AddAsync(project);
                 await DbContext.SaveChangesAsync();
@@ -96,18 +89,8 @@ namespace apiindserver.Controllers
                 {
                     return StatusCode(StatusCodes.Status404NotFound, string.Format("Project with ID = {0} not found", 0));
                 }
-                var version = await DbContext.Versions.FirstOrDefaultAsync(x => x.Name == upProj.Version);
-                if (version == null)
-                {
-                    version = new Models.Version
-                    {
-                        Name = upProj.Version
-                    };
-                    await DbContext.Versions.AddAsync(version);
-                    await DbContext.SaveChangesAsync();
-                }
                 project.Name = upProj.Name;
-                project.Version = version;
+                project.Version = upProj.Version;
                 DbContext.Projects.Update(project);
                 await DbContext.SaveChangesAsync();
                 return Ok(project);

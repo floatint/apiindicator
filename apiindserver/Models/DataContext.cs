@@ -12,7 +12,6 @@ namespace apiindserver.Models
         public DbSet<Product> Products { set; get; }
         public DbSet<User> Users { set; get; }
         public DbSet<Role> Roles { set; get; }
-        public DbSet<Version> Versions { set; get; }
         public DbSet<Criteria> Criterias { set; get; }
         public DbSet<LogRecord> LogRecords { set; get; }
 

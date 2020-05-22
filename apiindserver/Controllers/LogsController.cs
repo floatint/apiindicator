@@ -50,13 +50,6 @@ namespace apiindserver.Controllers
                 {
                     return StatusCode(StatusCodes.Status404NotFound, string.Format("User with ID = {0} not found", logRecord.TesterID));
                 }
-                var version = await DataContext.Versions.FirstOrDefaultAsync(x => x.Name == logRecord.Version);
-                if (version == null)
-                {
-                    version = new Models.Version { Name = logRecord.Version };
-                    await DataContext.Versions.AddAsync(version);
-                    await DataContext.SaveChangesAsync();
-                }
                 var newLogRecord = new Models.LogRecord
                 {
                     Product = product,

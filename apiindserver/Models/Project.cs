@@ -11,12 +11,6 @@ namespace apiindserver.Models
         public string Name { set; get; }
         public virtual ICollection<Product> Products { set; get; }
         public virtual ICollection<User> Testers { set; get; }
-        public virtual Version Version { set; get; }
-
-        public Project()
-        {
-            Products = new List<Product>();
-            Testers = new List<User>();
-        }
+        public string Version { set; get; }
     }
 }

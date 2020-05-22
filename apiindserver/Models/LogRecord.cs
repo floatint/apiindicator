@@ -16,7 +16,7 @@ namespace apiindserver.Models
         public long? ProjectID { set; get; }
         public virtual Project Project { set; get; }
         public string URL { set; get; }
-        public virtual Version Version { set; get; }
+        public string Version { set; get; }
         public DateTime DateTime { set; get; }
         public TimeSpan ResponseTime { set; get; }
         public long? TesterId { set; get; }
