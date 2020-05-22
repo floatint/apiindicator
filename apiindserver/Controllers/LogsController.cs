@@ -55,8 +55,8 @@ namespace apiindserver.Controllers
                     Product = product,
                     Project = project,
                     URL = logRecord.URL,
-                    Version = version,
-                    DateTime = logRecord.DateTime,
+                    Version = logRecord.Version,
+                    Date = logRecord.Date,
                     Tester = tester
                 };
                 await DataContext.LogRecords.AddAsync(newLogRecord);

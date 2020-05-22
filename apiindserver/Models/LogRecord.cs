@@ -17,7 +17,7 @@ namespace apiindserver.Models
         public virtual Project Project { set; get; }
         public string URL { set; get; }
         public string Version { set; get; }
-        public DateTime DateTime { set; get; }
+        public DateTime Date { set; get; }
         public TimeSpan ResponseTime { set; get; }
         public long? TesterId { set; get; }
         public virtual User Tester { set; get; }
