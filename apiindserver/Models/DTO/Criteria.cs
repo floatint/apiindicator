@@ -8,7 +8,8 @@ namespace apiindserver.Models.DTO
     public class Criteria
     {
         public string Name { set; get; }
-        public double? DifferencePercent { set; get; }
+        public double? MinDiffPercent { set; get; }
+        public double? MaxDiffPercent { set; get; }
         public int? Color { set; get; }
         public long? ProjectId { set; get; }
     }

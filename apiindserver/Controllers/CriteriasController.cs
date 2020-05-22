@@ -24,8 +24,6 @@ namespace apiindserver.Controllers
             Mapper = mapper;
         }
 
-
-
         //GET
         //URL : api/criterias
         //Get all criterias
@@ -37,21 +35,24 @@ namespace apiindserver.Controllers
             return Ok(Mapper.Map<IList<Models.Criteria>, IList<Models.DTO.Criteria>>(data));
         }
 
-        //GET
-        //URL : api/criterias/{id}
-        //Get {name} criteria
-        [Authorize(Roles = "Admin, Tester")]
-        public async Task<IActionResult> GetCriteria([FromHeader] long projectId, [FromQuery] string name)
+        [HttpGet("{diff:double}")]
+        public async Task<IActionResult> GetCriteriaByDiff([FromQuery] double diff, [FromHeader] long projectId)
         {
-
-            var criteria = await DbContext.Criterias.Include(x => x.Project.Id == projectId).FirstOrDefaultAsync(x => x.Name == name);
+            //try get concrete project criteria
+            var criteria = await DbContext.Criterias.FirstOrDefaultAsync(x => (x.ProjectId == projectId) && (diff >= x.MinDiffPercent && diff <= x.MaxDiffPercent));
+            //if project hasn't criteria
             if (criteria == null)
             {
-
-                return StatusCode(StatusCodes.Status404NotFound, projectId);
+                //try get common criteria
+                criteria = await DbContext.Criterias.FirstOrDefaultAsync(x => diff >= x.MinDiffPercent && diff <= x.MaxDiffPercent);
+                if (criteria == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, diff);
+                }
             }
-            return Ok(Mapper.Map<Models.Criteria, Models.DTO.Criteria>(criteria));
+            return Ok(criteria);
         }
+
 
         //POST
         //URL : api/criterias/
