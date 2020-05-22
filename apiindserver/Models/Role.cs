@@ -9,5 +9,6 @@ namespace apiindserver.Models
     {
         public long Id { set; get; }
         public string Name { set; get; }
+        public ICollection<UserRole> Users { set; get; }
     }
 }

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace apiindserver.Models
 {
-    public class Product
+    public class ProjectTester
     {
-        public long Id { set; get; }
-        public string Name { set; get; }
+        public long TesterId { set; get; }
+        public User Tester { set; get; }
         public long ProjectId { set; get; }
-        public virtual Project Project { set; get; }
+        public Project Project { set; get; }
     }
 }

@@ -36,8 +36,8 @@ namespace apiindserver.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = DbContext.Users.Include(x => x.Role).FirstOrDefault(x => x.Login == userObj.Login);
-                var r = user.Role.Name;
+                var user = DbContext.Users.Include(x => x.Roles).FirstOrDefault(x => x.Login == userObj.Login);
+                //var r = user.Role.Name;
                 
                 if (user != null && user.Password == Hash(userObj.Password))
                 {
@@ -48,7 +48,7 @@ namespace apiindserver.Controllers
                         {
                             new Claim("UserID", user.Id.ToString()),
                             new Claim(ClaimsIdentity.DefaultNameClaimType, user.Login),
-                            new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.Name)
+                            //new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.Name)
                         }),
 
                         Expires = DateTime.UtcNow.AddHours(6),

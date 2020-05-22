@@ -11,6 +11,7 @@ namespace apiindserver.Models
         public string Login { set; get; }
         public string Password { set; get; }
         public string Name { set; get; }
-        public virtual Role Role { set; get; }
+        public virtual ICollection<ProjectTester> Projects { set; get; }
+        public virtual ICollection<UserRole> Roles { set; get; }
     }
 }

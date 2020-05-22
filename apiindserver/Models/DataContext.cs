@@ -23,6 +23,33 @@ namespace apiindserver.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //helper tables
+
+            modelBuilder.Entity<ProjectTester>()
+                .HasKey(x => new { x.ProjectId, x.TesterId });
+            //project.testers
+            modelBuilder.Entity<ProjectTester>()
+                .HasOne(x => x.Project)
+                .WithMany(y => y.Testers)
+                .HasForeignKey(x => x.ProjectId);
+            //tester.projects
+            modelBuilder.Entity<ProjectTester>()
+                .HasOne(x => x.Tester)
+                .WithMany(y => y.Projects)
+                .HasForeignKey(x => x.TesterId);
+
+            modelBuilder.Entity<UserRole>()
+                .HasKey(x => new { x.UserId, x.RoleId });
+            //user.roles
+            modelBuilder.Entity<UserRole>()
+                .HasOne(x => x.User)
+                .WithMany(y => y.Roles)
+                .HasForeignKey(x => x.UserId);
+            //role.users
+            modelBuilder.Entity<UserRole>()
+                .HasOne(x => x.Role)
+                .WithMany(y => y.Users)
+                .HasForeignKey(x => x.RoleId);
         }
     }
 }

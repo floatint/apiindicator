@@ -39,7 +39,7 @@ namespace apiindserver.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllUsers()
         {
-            var usersList = await DbContext.Users.Include(x => x.Role).ToListAsync();
+            var usersList = await DbContext.Users.Include(x => x.Roles).ToListAsync();
             return Ok(Mapper.Map<List<Models.User>, List<Models.DTO.User>>(usersList));
         }
 
@@ -50,7 +50,7 @@ namespace apiindserver.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetUser(long id)
         {
-            var user = await DbContext.Users.Include(x => x.Role).FirstOrDefaultAsync(x => x.Id == id);
+            var user = await DbContext.Users.Include(x => x.Roles).FirstOrDefaultAsync(x => x.Id == id);
             if (user != null)
             {
                 return Ok(Mapper.Map<Models.DTO.User>(user));
@@ -73,11 +73,12 @@ namespace apiindserver.Controllers
                 {
                     role = DbContext.Roles.FirstOrDefault(x => x.Name == "User");
                 }
+                //TODO: fix role set
                 var user = new Models.User
                 {
                     Login = newUser.Login,
                     Password = Hash(newUser.Password),
-                    Role = role
+                    Roles = new List<Models.UserRole> {  }
                 };
 
                 await DbContext.Users.AddAsync(user);
@@ -122,17 +123,18 @@ namespace apiindserver.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = DbContext.Users.Include(x => x.Role).FirstOrDefault(x => x.Id == id);
+                var user = DbContext.Users.Include(x => x.Roles).FirstOrDefault(x => x.Id == id);
                 if (user == null)
                     return StatusCode(StatusCodes.Status404NotFound, id);
                 var role = DbContext.Roles.FirstOrDefault(x => x.Id == userObj.RoleId);
+                //Collectio
                 if (role == null)
                 {
-                    role = user.Role;
+                    //role = user.Roles;
                 }
 
                 user.Name = userObj.Name;
-                user.Role = role;
+                //user.Roles.Add(role);
                 DbContext.Users.Update(user);
                 await DbContext.SaveChangesAsync();
                 return Ok(userObj);
